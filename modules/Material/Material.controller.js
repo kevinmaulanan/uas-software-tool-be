@@ -1,4 +1,4 @@
-const { Material, Category } = require("../../models");
+const { Material, SubCategory } = require("../../models");
 const { Op } = require("sequelize");
 const _ = require("lodash");
 const { response } = require("express");
@@ -17,14 +17,13 @@ const CheckParamsInteger = params => {
   }
 };
 
-exports.MaterialList = async (req, res) => {
+exports.MaterialListByCategory = async (req, res) => {
   try {
-    let { search } = req.query;
-    search = search ?? "";
+    let { params } = req;
+    CheckParamsInteger(params);
     let materials = await Material.findAll({
-      where: {
-        materialTitle: { [Op.iLike]: `%${search}%` },
-      },
+      order: [["createdAt", "asc"]],
+      where: { subCategoryId: params.id },
     });
 
     res.status(200).send(materials);
@@ -53,7 +52,7 @@ exports.MaterialCreated = async (req, res) => {
       success: false,
       code: 400,
     };
-    [("materialText", "materialTitle", "categoryId")].map(v => {
+    [("materialText", "materialTitle", "subCategoryId")].map(v => {
       if (!req.body[v]) throw new Error(`${v} required`);
     });
 
@@ -62,10 +61,10 @@ exports.MaterialCreated = async (req, res) => {
       "materialVideo",
       "materialPDF",
       "materialText",
-      "categoryId",
+      "subCategoryId",
     ]);
 
-    let category = await Category.findByPk(body.categoryId);
+    let category = await SubCategory.findByPk(body.subCategoryId);
 
     if (category) {
       let material = await Material.findOne({

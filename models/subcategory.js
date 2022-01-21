@@ -1,27 +1,18 @@
 "use strict";
 
 module.exports = (sequelize, DataTypes) => {
-  var Material = sequelize.define("Material", {
-    subCategoryId: {
+  var SubCategory = sequelize.define("SubCategory", {
+    categoryId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "SubCategories",
+        model: "Categories",
         key: "id",
       },
     },
-    materialTitle: {
+    subCategoryTitle: {
       type: DataTypes.STRING,
       allowNull: false,
-    },
-    materialText: {
-      type: DataTypes.TEXT,
-    },
-    materialPDF: {
-      type: DataTypes.STRING,
-    },
-    materialVideo: {
-      type: DataTypes.STRING,
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -33,10 +24,11 @@ module.exports = (sequelize, DataTypes) => {
     },
   });
 
-  Material.associate = function (models) {
+  SubCategory.associate = function (models) {
     // associations can be defined here
-    Material.belongsTo(models.SubCategory, { foreignKey: "subCategoryId" });
+    SubCategory.hasMany(models.Material, { foreignKey: "subCategoryId" });
+    SubCategory.belongsTo(models.Category, { foreignKey: "categoryId" });
   };
 
-  return Material;
+  return SubCategory;
 };

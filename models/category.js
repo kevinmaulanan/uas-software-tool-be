@@ -10,6 +10,18 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    question: {
+      type: DataTypes.JSON,
+      allowNull: false,
+    },
+    pointReward: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    deletedStatus: {
+      type: DataTypes.INTEGER,
+      defaultValue: false,
+    },
     createdAt: {
       type: DataTypes.DATE,
       allowNull: false,
@@ -22,7 +34,7 @@ module.exports = (sequelize, DataTypes) => {
 
   Category.associate = function (models) {
     // associations can be defined here
-    Category.hasMany(models.Material, { foreignKey: "categoryId" });
+    Category.hasMany(models.SubCategory, { foreignKey: "categoryId" });
   };
 
   return Category;

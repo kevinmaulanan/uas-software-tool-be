@@ -16,6 +16,17 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      deletedStatus: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+      },
+      pointReward: {
+        type: Sequelize.INTEGER,
+      },
+      question: {
+        type: Sequelize.JSON,
+        allowNull: false,
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

@@ -1,4 +1,4 @@
-const { Category, Material } = require("../../models");
+const { Category, Material, SubCategory } = require("../../models");
 const { Op } = require("sequelize");
 const _ = require("lodash");
 
@@ -21,7 +21,7 @@ exports.CategoryList = async (req, res) => {
     let { search } = req.query;
     search = search ?? "";
     let categories = await Category.findAll({
-      include: Material,
+      include: SubCategory,
       where: {
         category: { [Op.iLike]: `%${search}%` },
       },
@@ -38,7 +38,7 @@ exports.CategoryDetail = async (req, res) => {
     let { params } = req;
     CheckParamsInteger(params);
     let category = await Category.findByPk(params.id, {
-      include: Material,
+      include: SubCategory,
     });
 
     res.status(200).send(category);
@@ -49,11 +49,13 @@ exports.CategoryDetail = async (req, res) => {
 
 exports.CategoryCreated = async (req, res) => {
   try {
-    ["category"].map(v => {
+    let body = ["category", "question", "pointReward"];
+    body.map(v => {
+      console.log(v);
       if (!req.body[v]) throw new Error(`${v} required`);
     });
 
-    let body = _.pick(req.body, ["category", "link_icon"]);
+    body = _.pick(req.body, [...body, "link_icon"]);
 
     let category = await Category.create(body);
 
