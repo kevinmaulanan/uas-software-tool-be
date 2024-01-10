@@ -9,7 +9,7 @@ const app = express();
 
 app.use(cors());
 app.use((req, res, next) => {
-  bodyParser.json()(req, res, error => {
+  bodyParser.json()(req, res, (error) => {
     if (error instanceof SyntaxError) {
       res
         .status(400)

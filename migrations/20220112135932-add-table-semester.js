@@ -1,33 +1,26 @@
 "use strict";
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable("Materials", {
+    return queryInterface.createTable("Semesters", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      subCategoryId: {
+      semester: {
         type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: "SubCategories",
-          key: "id",
-        },
       },
-      materialTitle: {
-        type: Sequelize.STRING,
+      priceTotal: {
+        type: Sequelize.INTEGER,
+      },
+      startDate: {
+        type: Sequelize.DATE,
         allowNull: false,
       },
-      materialPDF: {
-        type: Sequelize.STRING,
-      },
-      materialVideo: {
-        type: Sequelize.STRING,
-      },
-      materialText: {
-        type: Sequelize.TEXT,
+      endDate: {
+        type: Sequelize.DATE,
+        allowNull: false,
       },
       createdAt: {
         allowNull: false,
@@ -37,9 +30,12 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE,
       },
+      deletedAt: {
+        type: Sequelize.DATE,
+      },
     });
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable("Materials");
+    return queryInterface.dropTable("Semesters");
   },
 };

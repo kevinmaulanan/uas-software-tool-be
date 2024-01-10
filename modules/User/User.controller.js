@@ -1,11 +1,11 @@
 const jwt = require("jsonwebtoken");
-const { User } = require("../../models");
+const { User, Semester } = require("../../models");
 const { Op } = require("sequelize");
 const _ = require("lodash");
 
-const CheckParamsInteger = params => {
+const CheckParamsInteger = (params) => {
   try {
-    Object.keys(params).map(key => {
+    Object.keys(params).map((key) => {
       if (!params[key] || params[key] === "" || isNaN(params[key])) {
         throw new Error(`${key} must be number`);
       }
@@ -20,14 +20,15 @@ const CheckParamsInteger = params => {
 exports.UserList = async (req, res) => {
   try {
     let { search } = req.query;
-    let text = "";
     search = search ?? "";
     let users = await User.findAll({
       attributes: { exclude: ["password"] },
+      include: Semester,
       where: {
-        email: { [Op.iLike]: `%${search}%` },
+        npm: { [Op.iLike]: `%${search}%` },
         name: { [Op.iLike]: `%${search}%` },
       },
+      order: [["createdAt", "asc"]]
     });
 
     res.status(200).send(users);
@@ -38,11 +39,31 @@ exports.UserList = async (req, res) => {
 
 exports.Profile = async (req, res) => {
   try {
-    let user = await User.findByPk(req.user.id);
+    let user = await User.findByPk(req.user.id, {
+      attributes: { exclude: ["password"] },
+      include: Semester,
+    });
 
-    if (user) {
-      delete user.dataValues.password;
-    } else throw new Error("User tidak di temukan");
+    if (!user) {
+      throw new Error("User tidak di temukan");
+    }
+
+    res.status(200).send(user);
+  } catch (e) {
+    res.status(400).send(e.message);
+  }
+};
+
+exports.UserDetail = async (req, res) => {
+  try {
+    let user = await User.findByPk(req.params.id, {
+      attributes: { exclude: ["password"] },
+      include: Semester,
+    });
+
+    if (!user) {
+      throw new Error("User tidak di temukan");
+    }
 
     res.status(200).send(user);
   } catch (e) {
@@ -52,18 +73,18 @@ exports.Profile = async (req, res) => {
 
 exports.Login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { npm, password } = req.body;
     let response = {
       success: false,
       code: 400,
     };
 
-    ["email", "password"].map(v => {
+    ["npm", "password"].map((v) => {
       if (!req.body[v]) throw new Error(`${v} required`);
     });
 
     let userLogin = await User.findOne({
-      where: { email },
+      where: { npm },
     });
 
     if (userLogin) {
@@ -72,8 +93,8 @@ exports.Login = async (req, res) => {
       let user = {
         id: userLogin.id,
         name: userLogin.name,
-        email: userLogin.email,
-        username: userLogin.username,
+        npm: userLogin.npm,
+        role: userLogin.role,
       };
 
       if (correctPass) {
@@ -97,34 +118,34 @@ exports.Login = async (req, res) => {
 
 exports.Register = async (req, res) => {
   try {
-    const { email, username } = req.body;
+    const { npm } = req.body;
     let response = {
       success: false,
       code: 400,
     };
 
-    ["email", "password", "username"].map(v => {
+    ["npm", "password", "name", "semesterId"].map((v) => {
       if (!req.body[v]) throw new Error(`${v} required`);
     });
 
-    let body = _.pick(req.body, ["email", "password", "username"]);
+    let body = _.pick(req.body, ["npm", "password", "name", "semesterId"]);
 
-    let userLogin = await User.findOne({
-      where: {
-        [Op.or]: {
-          email,
-          username,
-        },
-      },
+    let findUser = await User.findOne({
+      where: { npm },
     });
 
-    if (userLogin === null) {
-      userLogin = await User.create({ ...body, name: username });
-      response = {
-        success: true,
-        code: 200,
-        message: "User berhasil dibuat",
-      };
+    if (findUser === null) {
+      let semester = await Semester.findByPk(body.semesterId);
+      if (semester) {
+        userLogin = await User.create({ ...body, role: "MAHASISWA" });
+        response = {
+          success: true,
+          code: 200,
+          message: "User berhasil dibuat",
+        };
+      } else {
+        response.message = "Semester tidak ditemukan!";
+      }
     } else {
       response.message = "Email or Username sudah terdaftar";
     }
