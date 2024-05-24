@@ -14,38 +14,14 @@ const hashPassword = async (user) => {
 
 module.exports = (sequelize, DataTypes) => {
   var User = sequelize.define("User", {
-    semesterId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: "Semesters",
-        key: "id",
-      },
-    },
     password: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    npm: {
-      type: DataTypes.STRING,
-      unique: true,
-      validate: {
-        isUnique: function (value, next) {
-          User.findOne({
-            where: {
-              npm: value,
-            },
-          }).then((user) => {
-            if (user) {
-              return next("NPM already used");
-            } else {
-              next();
-            }
-          });
-        },
-      },
-    },
     name: {
+      type: DataTypes.STRING,
+    },
+    email: {
       type: DataTypes.STRING,
     },
     role: {
@@ -75,8 +51,7 @@ module.exports = (sequelize, DataTypes) => {
 
   User.associate = function (models) {
     // associations can be defined here
-    User.hasMany(models.Payment, { foreignKey: "userId" });
-    User.belongsTo(models.Semester, { foreignKey: "semesterId" });
+    User.hasMany(models.Experience, { foreignKey: "userId" });
   };
 
   return User;

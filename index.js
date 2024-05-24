@@ -1,13 +1,16 @@
 const http = require("http");
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 const dotenv = require("dotenv");
 const bodyParser = require("body-parser");
+
 dotenv.config();
 
 const app = express();
 
 app.use(cors());
+app.use(express.static(path.join(__dirname + "/public")));
 app.use((req, res, next) => {
   bodyParser.json()(req, res, (error) => {
     if (error instanceof SyntaxError) {
